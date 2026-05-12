@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Happy Birthday 鈺婷</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;1,300;1,400&family=Noto+Serif+TC:wght@400;700&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F0EA;--card:#FDFAF6;--border:#E2D9CC;
+  --sage:#6B8F71;--sage-pale:#E8F0E9;
+  --text:#1E1E1E;--mid:#5A5550;--soft:#9E9690;
+  --lav:#8B7BB5;--lav-pale:#EEEAF7;
+}
+html{scroll-behavior:smooth}
+body{background:#000;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden}
+
+/* STAGE */
+#stage{position:fixed;inset:0;z-index:1000;background:#000;overflow:hidden}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%}
+#skip-btn{
+  position:absolute;bottom:28px;right:28px;z-index:10;
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:300;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(255,255,255,0.22);background:none;
+  border:0.5px solid rgba(255,255,255,0.12);
+  border-radius:20px;padding:8px 18px;cursor:pointer;transition:all 0.3s;
+}
+#skip-btn:hover{color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.3)}
+
+/* SITE */
+#site{display:none;opacity:0;transition:opacity 1.2s ease}
+#site.visible{opacity:1}
+
+.nav{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:100}
+.nav-dot{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--sage);background:transparent;cursor:pointer;transition:all 0.2s}
+.nav-dot.active{background:var(--sage)}
+
+.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 24px}
+.inner{width:100%;max-width:560px;margin:0 auto}
+.page-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--soft);margin-bottom:8px}
+.page-title{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:28px;color:var(--text);margin-bottom:28px}
+
+#p1{background:var(--bg)}
+.landing-name{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:clamp(64px,16vw,110px);line-height:0.9;color:var(--text);margin-bottom:8px}
+.landing-zh{font-family:'Noto Serif TC',serif;font-size:clamp(22px,5vw,34px);color:var(--sage);letter-spacing:0.16em;margin-bottom:28px}
+.landing-rule{width:40px;height:1px;background:var(--border);margin-bottom:24px}
+.landing-sub{font-size:15px;color:var(--mid);line-height:1.8;max-width:360px;margin-bottom:40px}
+.scroll-cta{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--soft);cursor:pointer;transition:color 0.2s}
+.scroll-cta:hover{color:var(--sage)}
+.scroll-arrow{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+#p2{background:var(--bg)}
+.pun-card{background:var(--card);border:0.5px solid var(--border);border-radius:20px;padding:30px 26px}
+.pun-count{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--soft);margin-bottom:18px}
+.pun-setup{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:21px;color:var(--text);line-height:1.5;margin-bottom:22px}
+.pun-btn{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;padding:12px 16px;border-radius:12px;border:0.5px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;text-align:left;transition:all 0.2s;display:block;margin-bottom:8px;width:100%}
+.pun-btn:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
+.pun-btn:disabled{cursor:default}
+.pun-btn.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage)}
+.pun-btn.wrong{background:#FFF0F0;border-color:#FFBBBB;color:#9B3030}
+.pun-answer{margin-top:18px;padding:16px 18px;border-radius:12px;background:var(--lav-pale);font-family:'Fraunces',serif;font-style:italic;font-size:17px;color:var(--lav);line-height:1.6;display:none}
+.pun-next{margin-top:14px;font-size:12px;color:var(--soft);text-decoration:underline;text-underline-offset:3px;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;display:none}
+
+#p3{background:#EFECE5}
+.vq-card{background:var(--card);border:0.5px solid var(--border);border-radius:20px;padding:26px}
+.vq-prog{display:flex;gap:5px;margin-bottom:20px}
+.vq-pip{flex:1;height:2px;border-radius:1px;background:var(--border);transition:background 0.3s}
+.vq-pip.done{background:var(--sage)}
+.vq-emoji{font-size:34px;margin-bottom:14px;display:block}
+.vq-q{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:19px;color:var(--text);line-height:1.55;margin-bottom:20px}
+.vq-opts{display:flex;flex-direction:column;gap:8px}
+.vopt{font-size:14px;font-weight:300;padding:12px 16px;border-radius:12px;border:0.5px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;text-align:left;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+.vopt:hover{border-color:var(--sage);background:var(--sage-pale)}
+.vopt.correct{background:var(--sage-pale);border-color:var(--sage);color:var(--sage)}
+.vopt.wrong{background:#FFF0F0;border-color:#FFBBBB;color:#9B3030}
+.vopt:disabled{cursor:default}
+.vq-fb{margin-top:16px;padding:14px 18px;border-radius:12px;background:var(--sage-pale);font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:var(--sage);line-height:1.6;display:none}
+.vq-nav{display:flex;justify-content:flex-end;margin-top:14px}
+.vq-next{font-size:13px;padding:9px 20px;border-radius:20px;border:0.5px solid var(--sage);background:transparent;color:var(--sage);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;display:none}
+.vq-next:hover{background:var(--sage);color:white}
+
+#p4{background:#EFECE5}
+.msg-page{max-width:460px;margin:0 auto}
+.msg-rule{width:32px;height:1px;background:var(--border);margin-bottom:32px}
+.msg-text{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:300;
+  font-size:clamp(20px,4.5vw,26px);color:var(--text);
+  line-height:1.75;margin-bottom:40px;
+}
+.msg-text span{color:var(--sage)}
+
+#p5{background:var(--bg)}
+.closing-inner{text-align:center;max-width:420px;margin:0 auto}
+.bear{font-size:56px;cursor:pointer;display:block;margin-bottom:20px;user-select:none;transition:transform 0.15s}
+.bear:active{transform:scale(0.88)}
+.bear-msg{padding:14px 18px;background:var(--lav-pale);border-radius:12px;font-size:13px;color:var(--lav);line-height:1.7;margin-bottom:28px;display:none;white-space:pre-line}
+.closing-zh{font-family:'Noto Serif TC',serif;font-size:24px;color:var(--sage);letter-spacing:0.14em;margin-bottom:14px}
+.closing-en{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:18px;color:var(--mid);line-height:1.75;margin-bottom:32px}
+.closing-sig{font-size:12px;color:var(--soft);letter-spacing:0.06em}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="c"></canvas>
+  <button id="skip-btn" onclick="endAnim()">skip ↓</button>
+</div>
+
+<div id="site">
+  <nav class="nav" id="nav"></nav>
+
+  <section class="page" id="p1">
+    <div class="inner">
+      <div class="landing-name">Yu Ting</div>
+      <div class="landing-zh">鈺婷</div>
+      <div class="landing-rule"></div>
+      <div class="landing-sub">A little website, made just for you. There are things to click. ❤️</div>
+      <div class="scroll-cta" onclick="goTo(1)">scroll <div class="scroll-arrow">↓</div></div>
+    </div>
+  </section>
+
+  <section class="page" id="p2">
+    <div class="inner">
+      <div class="page-label">for people who appreciate good jokes</div>
+      <div class="page-title">Pun time 🎤</div>
+      <div class="pun-card">
+        <div class="pun-count" id="pun-count"></div>
+        <div class="pun-setup" id="pun-setup"></div>
+        <div id="pun-opts"></div>
+        <div class="pun-answer" id="pun-answer"></div>
+        <button class="pun-next" id="pun-next" onclick="nextPun()">next joke →</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="p3">
+    <div class="inner">
+      <div class="page-label">a very important quiz</div>
+      <div class="page-title">Veggie knowledge 🥦</div>
+      <div class="vq-card">
+        <div class="vq-prog" id="vq-prog"></div>
+        <span class="vq-emoji" id="vq-emoji"></span>
+        <div class="vq-q" id="vq-q"></div>
+        <div class="vq-opts" id="vq-opts"></div>
+        <div class="vq-fb" id="vq-fb"></div>
+        <div class="vq-nav"><button class="vq-next" id="vq-next" onclick="nextVQ()">Next →</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="p4">
+    <div class="inner">
+      <div class="msg-page">
+        <div class="msg-rule"></div>
+        <div class="msg-text">
+          Happy 24th, <span>鈺婷</span>. You've made more of an impact on my life than you probably know — and I'm really glad our paths crossed. Hope this year brings you everything you deserve.
+        </div>
+        <div class="scroll-cta" onclick="goTo(4)" style="color:var(--soft)">
+          one more thing <div class="scroll-arrow" style="border-color:var(--border)">↓</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="p5">
+    <div class="inner">
+      <div class="closing-inner">
+        <span class="bear" id="bear" onclick="tapBear()">🐻</span>
+        <div class="bear-msg" id="bear-msg"></div>
+        <div class="closing-zh">生日快樂</div>
+        <div class="closing-en">Hope today is as good as you are.<br>(And that no carrots were involved.) 🥕❌</div>
+        <div class="closing-sig">made with care — just for you, 鈺婷</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   CINEMATIC ANIMATION  (~45 seconds)
+   Scene timeline:
+   0–4   stars appear + "happy birthday" types
+   4–10  "Yu Ting" slams in, 鈺婷 rises up
+   10–17 Nurse scene — heartbeat line + cross
+   17–24 Traveller — spinning wireframe globe
+   24–33 Veggie scene — good veggies fly in, carrot REJECTED
+   33–41 Winnie the Pooh classified scene
+   41–52 Grand finale — 生日快樂 explodes in with particles
+   52+   fade to site
+═══════════════════════════════════════════ */
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, animDone = false, startTime = null, rafId;
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+// Easing
+const E = {
+  out3: t => 1-Math.pow(1-t,3),
+  out5: t => 1-Math.pow(1-t,5),
+  inOut: t => t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,
+  elastic: t => t===0?0:t===1?1:Math.pow(2,-10*t)*Math.sin((t*10-0.75)*(2*Math.PI)/3)+1,
+};
+
+// Stars
+const STARS = Array.from({length:220},()=>({
+  x:Math.random(), y:Math.random(),
+  r:Math.random()*1.5+0.2,
+  tw:Math.random()*Math.PI*2,
+  sp:Math.random()*0.012+0.004
+}));
+function drawStars(alpha) {
+  STARS.forEach(s => {
+    s.tw += s.sp;
+    const o = (Math.sin(s.tw)*0.45+0.55)*alpha;
+    ctx.beginPath();
+    ctx.arc(s.x*W, s.y*H, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${o})`;
+    ctx.fill();
+  });
+}
+
+// Particles
+let particles = [];
+function burst(x, y, color, n=28, spd=7) {
+  for(let i=0;i<n;i++){
+    const a=(Math.PI*2/n)*i+Math.random()*0.4;
+    const v=spd*(0.4+Math.random()*0.9);
+    particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:Math.random()*4+2,color,life:1,decay:0.016+Math.random()*0.014,grav:0.14});
+  }
+}
+function tickParticles() {
+  particles = particles.filter(p=>p.life>0);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=p.grav; p.vx*=0.97; p.life-=p.decay;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,Math.max(p.r*p.life,0),0,Math.PI*2);
+    ctx.fillStyle=p.color.replace('1)',`${p.life})`);
+    ctx.fill();
+  });
+}
+
+// Draw helpers
+function fill(color, alpha) {
+  ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle=color;
+  ctx.fillRect(0,0,W,H); ctx.restore();
+}
+function label(text, x, y, size, color, alpha, font='DM Sans', italic=false, weight=300) {
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.fillStyle=color;
+  ctx.font=`${italic?'italic ':''} ${weight} ${size}px "${font}", serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text,x,y);
+  ctx.restore();
+}
+function typeReveal(text, x, y, size, color, progress, font='DM Sans', italic=false) {
+  const n = Math.floor(text.length * E.out3(Math.min(progress,1)));
+  label(text.substring(0,n), x, y, size, color, Math.min(progress*3,1), font, italic);
+}
+function slamIn(text, x, y, size, color, progress, font='Fraunces', weight=300) {
+  const p = E.elastic(Math.min(progress,1));
+  ctx.save();
+  ctx.globalAlpha = Math.min(progress*3,1);
+  ctx.translate(x,y);
+  ctx.scale(Math.max(0.01,p), Math.max(0.01,p));
+  ctx.fillStyle=color;
+  ctx.font=`italic ${weight} ${size}px "${font}", serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text,0,0);
+  ctx.restore();
+}
+
+// ── Main draw ──
+function draw(t) {
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2;
+
+  // always black bg
+  fill('#000', 1);
+
+  /* ── 0–4s: Stars fade in + "happy birthday" types ── */
+  drawStars(Math.min(t/2.5, 1));
+
+  if(t > 0.8 && t < 11) {
+    const p = Math.min((t-0.8)/2,1);
+    typeReveal('happy birthday', cx, cy-H*0.28, 13, 'rgba(255,255,255,0.35)', p);
+  }
+
+  /* ── 4–10s: Name slams in ── */
+  if(t >= 4 && t < 12) {
+    const out = t>9.5 ? E.inOut((t-9.5)/1.5) : 0;
+    const nameSize = Math.min(W*0.19, 118);
+    slamIn('Yu Ting', cx, cy-10, nameSize, 'white', Math.min((t-4)/1.0,1));
+
+    if(t >= 5.8) {
+      const p2 = E.out3(Math.min((t-5.8)/1,1));
+      ctx.save();
+      ctx.globalAlpha = p2*(1-out);
+      ctx.fillStyle='#6B8F71';
+      ctx.font=`700 ${Math.min(W*0.08,48)}px "Noto Serif TC",serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('鈺婷', cx, cy+70);
+      ctx.restore();
+    }
+    if(t >= 7 && t < 10) {
+      typeReveal('this is her website', cx, cy+115, 12, 'rgba(255,255,255,0.28)', Math.min((t-7)/1,1));
+    }
+    // burst on slam
+    if(t>4.05&&t<4.18&&Math.random()>0.5) burst(cx,cy-10,'rgba(255,255,255,',10,6);
+
+    if(out>0) fill('#000', out);
+  }
+
+  /* ── 10–17s: Nurse scene ── */
+  if(t >= 10 && t < 18) {
+    const st = t-10;
+    const out = st>6.5 ? E.inOut((st-6.5)/1.2) : 0;
+
+    drawStars(0.25);
+
+    // Heartbeat line
+    if(st>1.2) {
+      const lp = Math.min((st-1.2)/2.2,1);
+      const lw = W*0.62, lx = cx-lw/2;
+      // path segments: [progress, relY]
+      const segs=[[0,0],[0.18,0],[0.27,-0.65],[0.36,0.95],[0.45,-0.95],[0.54,0.65],[0.62,0],[0.82,0],[1,0]];
+      ctx.save();
+      ctx.globalAlpha=(1-out)*Math.min(lp*2,1);
+      ctx.strokeStyle='#E05555';
+      ctx.lineWidth=2.5;
+      ctx.shadowColor='#E05555';
+      ctx.shadowBlur=10;
+      ctx.beginPath();
+      let started=false;
+      for(let i=0;i<segs.length-1;i++){
+        const [p0,y0]=segs[i],[p1,y1]=segs[i+1];
+        if(p0>lp)break;
+        const xA=lx+p0*lw, yA=cy+y0*55;
+        const drawP1=Math.min(p1,lp);
+        const xB=lx+drawP1*lw, yB=cy+y1*55+(p1>lp?(y0+(y1-y0)*((lp-p0)/(p1-p0)))*55-cy-y1*55:0);
+        if(!started){ctx.moveTo(xA,yA);started=true;}
+        ctx.lineTo(xB, cy+(p1>lp ? y0+(y1-y0)*((lp-p0)/(p1-p0)) : y1)*55);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Cross
+    if(st>3.2) {
+      const cp=E.elastic(Math.min((st-3.2)/1.2,1));
+      ctx.save();
+      ctx.globalAlpha=(1-out)*cp;
+      ctx.fillStyle='rgba(255,255,255,0.9)';
+      const cs=22*cp;
+      ctx.fillRect(cx-4,cy-cs-68,8,cs*2);
+      ctx.fillRect(cx-cs,cy-4-68,cs*2,8);
+      ctx.restore();
+    }
+
+    if(st>4.2) {
+      const tp=Math.min((st-4.2)/0.9,1);
+      label('Keeps people alive for a living.', cx, cy+80, 15, 'rgba(255,255,255,0.85)', E.out3(tp)*(1-out));
+    }
+
+    if(out>0) fill('#000',out);
+  }
+
+  /* ── 17–24s: Traveller — globe ── */
+  if(t >= 17 && t < 25) {
+    const st=t-17;
+    const out=st>6.5?E.inOut((st-6.5)/1.2):0;
+    drawStars(0.25);
+
+    const gr=Math.min(W,H)*0.23;
+    const rot=st*0.55;
+    const ga=Math.min(st/1.5,1)*(1-out);
+
+    // Globe wireframe
+    ctx.save();
+    ctx.globalAlpha=ga*0.45;
+    ctx.strokeStyle='#6B8F71';
+    ctx.lineWidth=1;
+    // latitude rings
+    for(let lat=-60;lat<=60;lat+=30){
+      const lr=Math.cos(lat*Math.PI/180)*gr;
+      const ly=Math.sin(lat*Math.PI/180)*gr;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy+ly, lr, lr*0.18, 0, 0, Math.PI*2);
+      ctx.stroke();
+    }
+    // longitude arcs
+    for(let lon=0;lon<180;lon+=30){
+      const a=(lon+rot*25)*Math.PI/180;
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(a);
+      ctx.beginPath();
+      ctx.ellipse(0,0,Math.abs(Math.cos(a)*gr),gr,0,0,Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    // outline
+    ctx.globalAlpha=ga*0.7;
+    ctx.beginPath();
+    ctx.arc(cx,cy,gr,0,Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+
+    // Plane orbiting
+    if(st>1.2){
+      const angle=rot*1.8;
+      const px=cx+Math.cos(angle)*gr;
+      const py=cy+Math.sin(angle)*gr*0.38;
+      ctx.save();
+      ctx.globalAlpha=Math.min((st-1.2)/0.6,1)*(1-out);
+      ctx.font='26px serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('✈️',px,py);
+      ctx.restore();
+    }
+
+    if(st>3){
+      label('Has places to be.', cx, cy+gr+40, 15, 'rgba(255,255,255,0.85)', E.out3(Math.min((st-3)/0.8,1))*(1-out));
+    }
+    if(out>0) fill('#000',out);
+  }
+
+  /* ── 24–33s: Veggie scene ── */
+  if(t >= 24 && t < 34) {
+    const st=t-24;
+    const out=st>8?E.inOut((st-8)/1.2):0;
+    drawStars(0.2);
+
+    // Good veggies fly in
+    const veggies=['🥦','🥬','🌽','🫑','🥒','🧄'];
+    veggies.forEach((v,i)=>{
+      const delay=1+i*0.22;
+      if(st<delay)return;
+      const vp=E.out3(Math.min((st-delay)/0.7,1));
+      const cols=3;
+      const spacing=80;
+      const gridW=(cols-1)*spacing;
+      const tx=cx-gridW/2+(i%cols)*spacing;
+      const ty=cy-30+Math.floor(i/cols)*75;
+      ctx.save();
+      ctx.globalAlpha=vp*(1-out);
+      ctx.translate(tx, ty-(1-vp)*50);
+      ctx.font=`${Math.round(32*vp)}px serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(v,0,0);
+      ctx.restore();
+    });
+
+    // Carrot arrives from right, stops dead centre below the veggie grid
+    if(st>3.5){
+      const cp=Math.min((st-3.5)/0.9,1);
+      const carrotTargetX=cx;
+      const carrotTargetY=cy+110;
+      let carrotX=W+100-(E.out3(cp))*(W+100-carrotTargetX);
+      let carrotY=carrotTargetY;
+      let ca=1-out;
+      let cs=1;
+
+      if(st>5.2){
+        const rp=st-5.2;
+        if(rp<0.5){
+          carrotX+=Math.sin(rp*100)*16;
+        } else {
+          const fly=E.out5(Math.min((rp-0.5)/0.8,1));
+          carrotX=carrotTargetX+fly*W*0.8;
+          carrotY=carrotTargetY-fly*H*0.4;
+          cs=1-fly*0.5;
+          ca=(1-fly)*(1-out);
+        }
+      }
+
+      ctx.save();
+      ctx.globalAlpha=ca;
+      ctx.translate(carrotX,carrotY);
+      ctx.scale(cs,cs);
+      ctx.font='72px serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🥕',0,0);
+      ctx.restore();
+
+      // Big white-backed X slams on top of carrot
+      if(st>5&&st<6.4){
+        const xp=E.elastic(Math.min((st-5)/0.65,1));
+        ctx.save();
+        ctx.globalAlpha=Math.min(xp*2,1)*(1-out);
+        ctx.fillStyle='rgba(255,255,255,0.95)';
+        ctx.beginPath();
+        ctx.arc(carrotX,carrotY,44*xp,0,Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle='#EE1111';
+        ctx.lineWidth=9;
+        ctx.lineCap='round';
+        ctx.translate(carrotX,carrotY);
+        const xs=26*xp;
+        ctx.beginPath();ctx.moveTo(-xs,-xs);ctx.lineTo(xs,xs);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(xs,-xs);ctx.lineTo(-xs,xs);ctx.stroke();
+        ctx.restore();
+        if(st>5.05&&st<5.3&&Math.random()>0.35) burst(carrotX,carrotY,'rgba(238,17,17,',18,9);
+      }
+    }
+
+    if(st>6.5){
+      label('All veggies welcome.', cx, cy+100, 15, 'rgba(255,255,255,0.85)', E.out3(Math.min((st-6.5)/0.8,1))*(1-out));
+    }
+    if(st>7.2){
+      label('Except carrots. Obviously. 🥕', cx, cy+122, 13, 'rgba(255,100,100,0.9)', E.out3(Math.min((st-7.2)/0.6,1))*(1-out));
+    }
+    if(out>0) fill('#000',out);
+  }
+
+  /* ── 33–41s: Winnie the Pooh ── */
+  if(t >= 33 && t < 42) {
+    const st=t-33;
+    const out=st>7?E.inOut((st-7)/1.5):0;
+    drawStars(0.2);
+    if(st>0.3) typeReveal('classified information', cx, cy-H*0.28, 10, 'rgba(255,180,50,0.4)', Math.min((st-0.3)/1.2,1));
+
+    if(st>1){
+      const bp=E.elastic(Math.min((st-1)/1.5,1));
+      const by=cy-30-(1-bp)*H*0.55;
+      ctx.save();
+      ctx.globalAlpha=Math.min((st-1)*2,1)*(1-out);
+      ctx.font=`${Math.round(Math.max(4,80*bp))}px serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🐻',cx,by);
+      ctx.restore();
+      if(st>1.05&&st<1.2&&Math.random()>0.6) burst(cx,cy-30,'rgba(255,200,80,',8,5);
+    }
+    if(st>2.8){
+      const hp=E.elastic(Math.min((st-2.8)/1,1));
+      ctx.save();
+      ctx.globalAlpha=Math.min((st-2.8)*2,1)*(1-out);
+      ctx.font=`${Math.round(Math.max(2,42*hp))}px serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🍯',cx+80,cy+15);
+      ctx.restore();
+    }
+
+    if(st>4){
+      label('Completely unrelated to anyone.', cx, cy+65, 15, 'rgba(255,255,255,0.85)', E.out3(Math.min((st-4)/0.8,1))*(1-out));
+    }
+    if(st>5){
+      label('🇹🇼  No further questions.', cx, cy+88, 13, 'rgba(255,200,80,0.9)', E.out3(Math.min((st-5)/0.6,1))*(1-out));
+    }
+    if(out>0) fill('#000',out);
+  }
+
+  /* ── 41–53s: Grand finale 生日快樂 ── */
+  if(t >= 41 && t < 54) {
+    const st=t-41;
+    const out=st>11?E.inOut((st-11)/2):0;
+    drawStars(Math.min(st/3,0.7));
+
+    const chars=['生','日','快','樂'];
+    const charColors=['#6B8F71','#8B7BB5','#C9A96E','#E07777'];
+    const charSize=Math.min(W*0.16,100);
+    const gap=charSize*1.12;
+    const totalW=(chars.length-1)*gap;
+    const baseX=cx-totalW/2;
+
+    chars.forEach((ch,i)=>{
+      const delay=0.6+i*0.6;
+      if(st<delay)return;
+      const cp=Math.min((st-delay)/0.6,1);
+      const chX=baseX+i*gap;
+      // burst on entry
+      if(cp>0&&cp<0.14) burst(chX, cy-15, `rgba(${charColors[i].slice(1).match(/../g).map(x=>parseInt(x,16)).join(',')},`, 22, 9);
+
+      slamIn(ch, chX, cy-15, charSize, charColors[i], cp, 'Noto Serif TC', 700);
+    });
+
+    // Subtitle
+    if(st>3.8){
+      const tp=Math.min((st-3.8)/1,1);
+      label('Happy Birthday, 鈺婷 ❤️', cx, cy+charSize*0.75, 20, 'rgba(255,255,255,0.9)', E.out3(tp)*(1-out), 'Fraunces', true);
+    }
+
+    // Confetti rain
+    if(st>1.5&&st<10&&Math.random()>0.35){
+      const cols=['rgba(107,143,113,','rgba(139,123,181,','rgba(201,169,110,','rgba(255,255,255,','rgba(224,119,119,'];
+      burst(Math.random()*W, Math.random()*-20, cols[Math.floor(Math.random()*cols.length)], 4, 5);
+    }
+
+    tickParticles();
+    if(out>0) fill('#000',out);
+    if(st>12.5&&!animDone) endAnim();
+  } else {
+    tickParticles();
+  }
+}
+
+function endAnim() {
+  if(animDone)return;
+  animDone=true;
+  cancelAnimationFrame(rafId);
+  const stage=document.getElementById('stage');
+  stage.style.transition='opacity 1.2s ease';
+  stage.style.opacity='0';
+  setTimeout(()=>{
+    stage.style.display='none';
+    document.body.style.background='var(--bg)';
+    const site=document.getElementById('site');
+    site.style.display='block';
+    requestAnimationFrame(()=>site.classList.add('visible'));
+  },1200);
+}
+
+function loop(ts){
+  if(!startTime)startTime=ts;
+  draw((ts-startTime)/1000);
+  if(!animDone)rafId=requestAnimationFrame(loop);
+}
+rafId=requestAnimationFrame(loop);
+
+/* ══════════════════════
+   SITE
+══════════════════════ */
+const pages=[...document.querySelectorAll('.page')];
+const navEl=document.getElementById('nav');
+pages.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='nav-dot'+(i===0?' active':'');
+  d.onclick=()=>goTo(i);
+  navEl.appendChild(d);
+});
+function goTo(i){pages[i].scrollIntoView({behavior:'smooth'})}
+pages.forEach(p=>{
+  new IntersectionObserver(e=>{
+    if(e[0].isIntersecting){
+      const i=pages.indexOf(p);
+      document.querySelectorAll('.nav-dot').forEach((d,di)=>d.classList.toggle('active',di===i));
+    }
+  },{threshold:0.5}).observe(p);
+});
+
+const puns=[
+  {s:"Why did the nurse bring a red pen to work?",opts:["To sign papers","In case she needed to draw blood 🩸","For writing notes","For marking charts"],a:1,punch:"In case she needed to draw blood! 🩸 She takes this as a compliment."},
+  {s:"What do you call a vegetable that plays music?",opts:["A turnip","A leek","A beet 🎵","A drum-kin"],a:2,punch:"A beet! 🎵 Drop the beet. (Never drop the carrot. The carrot was never invited.)"},
+  {s:"What do you call a fake noodle?",opts:["A lie-nguine","A fakey","An impasta 🍝","A fraud-fettuccine"],a:2,punch:"An impasta! 🍝 A gift to the English language."},
+  {s:"Why was the carrot not invited to the birthday party?",opts:["It forgot to RSVP","It was too crunchy","Because 鈺婷 was at the door 🥕❌","It brought bad dip"],a:2,punch:"Obviously. Some vegetables simply do not make the guest list. 🥕❌"},
+  {s:"Why don't scientists trust atoms?",opts:["They are too small","They make up everything","They keep disappearing","They are always negative"],a:1,punch:"Because they make up everything. Just like certain honey-loving world leaders. 🍯"}
+];
+let pi=0,pa=false;
+function renderPun(){
+  const p=puns[pi];
+  document.getElementById('pun-count').textContent=`Joke ${pi+1} of ${puns.length}`;
+  document.getElementById('pun-setup').textContent=p.s;
+  document.getElementById('pun-answer').style.display='none';
+  document.getElementById('pun-next').style.display='none';
+  pa=false;
+  const el=document.getElementById('pun-opts');el.innerHTML='';
+  p.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='pun-btn';b.textContent=o;
+    b.onclick=()=>{
+      if(pa)return;pa=true;
+      document.querySelectorAll('.pun-btn').forEach((btn,bi)=>{btn.disabled=true;if(bi===p.a)btn.classList.add('correct');else if(btn===b)btn.classList.add('wrong');});
+      const ans=document.getElementById('pun-answer');
+      ans.textContent=(i===p.a?'✓ ':'Not quite! ')+p.punch;
+      ans.style.display='block';
+      if(pi<puns.length-1)document.getElementById('pun-next').style.display='block';
+      else setTimeout(()=>{ans.textContent+=' 🎉 You have excellent taste in jokes.'},350);
+    };
+    el.appendChild(b);
+  });
+}
+function nextPun(){pi++;renderPun();}
+renderPun();
+
+const vqs=[
+  {e:'🥕',q:'Which vegetable is the worst one?',opts:['Broccoli 🥦','Spinach 🌿','Carrot 🥕','Mushroom 🍄'],a:2,fb:'Correct. The carrot. This is not a debate. 🥕❌'},
+  {e:'🍅',q:'A tomato — is it a fruit or a vegetable?',opts:['It is a vegetable','It is a fruit 🍅','It is both','It is neither'],a:1,fb:'It is a fruit! But it does NOT belong in a fruit salad. Some facts are true but unhelpful.'},
+  {e:'🥦',q:'Broccoli is a type of flower. When you eat broccoli, you are eating…',opts:['A root','A leaf','A flower 🌸','A seed'],a:2,fb:'A flower! 🌸 Broccoli is literally a bouquet. Very elegant.'},
+  {e:'🌿',q:'What did one herb say to the other on their birthday?',opts:["I'm so proud of you","Happy birthday to chive! 🌿","You look so fresh","Let's celery-brate!"],a:1,fb:'"Happy birthday to chive!" 🌿 That one was for you. Veggie expert status: achieved.'}
+];
+let vi=0,va=false;
+function renderVQ(){
+  const q=vqs[vi];
+  document.getElementById('vq-emoji').textContent=q.e;
+  document.getElementById('vq-q').textContent=q.q;
+  document.getElementById('vq-fb').style.display='none';
+  document.getElementById('vq-next').style.display='none';
+  va=false;
+  const prog=document.getElementById('vq-prog');prog.innerHTML='';
+  vqs.forEach((_,i)=>{const d=document.createElement('div');d.className='vq-pip'+(i<vi?' done':'');prog.appendChild(d);});
+  const el=document.getElementById('vq-opts');el.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='vopt';b.textContent=o;
+    b.onclick=()=>{
+      if(va)return;va=true;
+      document.querySelectorAll('.vopt').forEach((btn,bi)=>{btn.disabled=true;if(bi===q.a)btn.classList.add('correct');else if(btn===b)btn.classList.add('wrong');});
+      const fb=document.getElementById('vq-fb');
+      fb.textContent=q.fb;fb.style.display='block';
+      document.querySelectorAll('#vq-prog .vq-pip')[vi].classList.add('done');
+      if(vi<vqs.length-1)document.getElementById('vq-next').style.display='block';
+    };
+    el.appendChild(b);
+  });
+}
+function nextVQ(){vi++;renderVQ();}
+renderVQ();
+
+const bearSeq=[
+  {e:'🍯',m:'This bear has absolutely no resemblance to any world leader.\nHe just wanted to say 生日快樂. 🐻'},
+  {e:'👀',m:'He is just a bear. A normal, innocent bear. Please do not look too closely.'},
+  {e:'😶',m:'He has nothing to say about international politics.'},
+  {e:'🐼',m:'(He switched to a panda. For legal reasons.)'},
+  {e:'🐻',m:"Okay he's back. Have a really good birthday, 鈺婷. ❤️"}
+];
+let bc=0,bOpen=false;
+function tapBear(){
+  const msg=document.getElementById('bear-msg'),bear=document.getElementById('bear');
+  if(!bOpen){bOpen=true;bear.textContent=bearSeq[0].e;msg.style.display='block';msg.textContent=bearSeq[0].m;}
+  else{bc=(bc+1)%bearSeq.length;bear.textContent=bearSeq[bc].e;msg.textContent=bearSeq[bc].m;}
+}
+</script>
+</body>
+</html>
